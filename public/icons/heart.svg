@@ -1,0 +1,8 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <path d="M20 35.5C20 35.5 19.5 35 19 34.5C12 28 5 22 5 14.5C5 10.5 8 7.5 12 7.5C14.5 7.5 17 9 19 11C21 9 23.5 7.5 26 7.5C30 7.5 33 10.5 33 14.5C33 22 26 28 19 34.5C18.5 35 18 35.5 20 35.5Z" fill="#FF6B6B">
+      <animate attributeName="fill" values="#FF6B6B;#EF4444;#FF6B6B" dur="1.5s" repeatCount="indefinite" />
+      <animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="1.5s" repeatCount="indefinite" />
+    </path>
+  </g>
+</svg>
