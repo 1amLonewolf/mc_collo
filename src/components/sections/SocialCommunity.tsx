@@ -71,7 +71,7 @@ export function SocialCommunity() {
               {/* CTA */}
               <div className="flex items-center text-primary-400 text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">
                 Follow Us
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>

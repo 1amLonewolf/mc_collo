@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   keywords: ['MC', 'Master of Ceremonies', 'Wedding MC', 'Corporate Events', 'Event Host', 'Professional MC', 'MC Collo Events', 'Busia MC', 'Kenya MC', 'Dowry Ceremony', 'Fundraising MC'],
   authors: [{ name: 'MC Collo Events' }],
   metadataBase: new URL('https://mccollo.com'),
+  alternates: {
+    canonical: 'https://mccollo.com/',
+  },
   icons: {
     icon: [
       { url: '/Images/MC_COLLO_LOGO.png', type: 'image/png', sizes: '32x32' },
@@ -34,11 +37,20 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://mccollo.com/',
     siteName: 'MC Collo Events',
+    images: [
+      {
+        url: '/Images/MC_COLLO_LOGO.png',
+        width: 512,
+        height: 512,
+        alt: 'MC Collo Events Logo',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MC Collo Events | Professional Master of Ceremonies',
     description: 'Professional MC for weddings, corporate events, galas, conferences, and private celebrations.',
+    images: ['/Images/MC_COLLO_LOGO.png'],
   },
 };
 

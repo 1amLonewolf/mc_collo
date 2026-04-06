@@ -12,6 +12,7 @@ Welcome to the MC COLLO documentation. This index helps you find the right guide
 | [CUSTOMIZATION.md](./CUSTOMIZATION.md) | How to modify content, styles, components | Developers, Content editors |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Deploy to Vercel, Netlify, Docker, etc. | Developers, DevOps |
 | [MAINTENANCE.md](./MAINTENANCE.md) | Updates, monitoring, troubleshooting | Developers, Site owners |
+| [EMAILJS_SETUP.md](./EMAILJS_SETUP.md) | Step-by-step EmailJS configuration | Developers |
 
 ---
 
@@ -29,7 +30,7 @@ Welcome to the MC COLLO documentation. This index helps you find the right guide
 → See [CUSTOMIZATION.md](./CUSTOMIZATION.md) - Content Updates
 
 #### Set Up Contact Form
-→ See [README.md](../README.md) - EmailJS Integration
+→ See [EMAILJS_SETUP.md](./EMAILJS_SETUP.md) - EmailJS step-by-step guide
 
 #### Deploy the Website
 → See [DEPLOYMENT.md](./DEPLOYMENT.md) - Choose your platform
@@ -53,16 +54,21 @@ mc-collo/
 ├── docs/                     # Additional documentation
 │   ├── CUSTOMIZATION.md     # How to customize
 │   ├── DEPLOYMENT.md        # How to deploy
+│   ├── EMAILJS_SETUP.md     # EmailJS step-by-step setup
 │   ├── MAINTENANCE.md       # How to maintain
 │   └── INDEX.md             # This file
 ├── src/
 │   ├── app/                 # Next.js app router
+│   │   ├── api/contact/     # Form submission API route (security checks)
+│   │   ├── privacy-policy/  # Privacy Policy page
+│   │   └── terms-of-service/ # Terms of Service page
 │   ├── components/          # React components
-│   └── lib/                 # Utilities
+│   └── lib/                 # Utilities (security.ts, emailjs.ts, utils.ts)
 ├── public/                  # Static assets
+├── .github/workflows/       # CI/CD pipeline
 ├── package.json             # Dependencies
 ├── tailwind.config.ts       # Styling config
-└── .env.local.example       # Environment variables template
+└── .env.local               # Environment variables (DO NOT COMMIT)
 ```
 
 ---
@@ -85,7 +91,18 @@ mc-collo/
 | Services | `sections/Services.tsx` | Service offerings |
 | Portfolio | `sections/Portfolio.tsx` | Event gallery |
 | Testimonials | `sections/Testimonials.tsx` | Client reviews |
-| Contact | `sections/Contact.tsx` | Booking form |
+| SocialCommunity | `sections/SocialCommunity.tsx` | Social media links section |
+| Contact | `sections/Contact.tsx` | Booking form (with security: honeypot, rate limiting, time validation) |
+
+### Page Routes
+
+| Route | File | Description |
+|-------|------|-------------|
+| `/` | `app/page.tsx` | Homepage (all sections) |
+| `/404` | `app/not-found.tsx` | Custom 404 page with countdown |
+| `/privacy-policy` | `app/privacy-policy/page.tsx` | Privacy Policy (Kenya DPA compliant) |
+| `/terms-of-service` | `app/terms-of-service/page.tsx` | Terms of Service |
+| `/api/contact` | `app/api/contact/route.ts` | Form submission API (rate limiting, honeypot, time check) |
 
 ### UI Components
 
@@ -139,14 +156,25 @@ npm run build
 ### Environment Variables
 
 ```bash
-# Create .env.local
+# Create .env.local (DO NOT COMMIT)
 cp .env.local.example .env.local
 
-# Edit with your values
-# NEXT_PUBLIC_EMAILJS_SERVICE_ID=...
-# NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=...
-# NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=...
+# Edit with your EmailJS credentials
+# NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_xyz
+# NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID=template_notification
+# NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID=template_confirmation
+# NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=user_def
 ```
+
+### Security Features
+
+The contact form includes three layers of protection:
+
+1. **Honeypot Field** — Hidden field that bots fill but humans don't see
+2. **Time Validation** — Rejects submissions made in under 3 seconds
+3. **Rate Limiting** — Maximum 3 submissions per IP per hour
+
+All checks run server-side at `/api/contact`.
 
 ---
 
@@ -179,11 +207,12 @@ cp .env.local.example .env.local
 
 | Package | Version | Last Updated |
 |---------|---------|--------------|
-| Next.js | 14.2.x | March 2026 |
-| React | 18.3.x | March 2026 |
-| Tailwind CSS | 3.4.x | March 2026 |
-| Framer Motion | 11.15.x | March 2026 |
-| TypeScript | 5.7.x | March 2026 |
+| Next.js | 14.2.x | April 2026 |
+| React | 18.3.x | April 2026 |
+| Tailwind CSS | 3.4.x | April 2026 |
+| Framer Motion | 11.15.x | April 2026 |
+| TypeScript | 5.7.x | April 2026 |
+| EmailJS | 4.4.x | April 2026 |
 
 Check for updates: `npm outdated`
 
@@ -209,6 +238,15 @@ If you find errors or gaps in this documentation:
 
 ## Documentation Changelog
 
+### April 2026
+- Added EMAILJS_SETUP.md with dual-template guide
+- Added /privacy-policy and /terms-of-service pages
+- Added security documentation (honeypot, rate limiting, CSP headers)
+- Added /api/contact API route documentation
+- Updated DEPLOYMENT.md with correct environment variables
+- Updated INDEX.md with new pages, routes, and security features
+- Updated all dates to April 2026
+
 ### March 2026
 - Created comprehensive documentation suite
 - Added customization guide
@@ -219,4 +257,4 @@ If you find errors or gaps in this documentation:
 
 **Need to update this index?** Edit `docs/INDEX.md`
 
-**Last Updated**: March 2026
+**Last Updated**: April 2026

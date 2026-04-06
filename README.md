@@ -192,13 +192,16 @@ This inquiry was submitted via MC COLLO website.
    ```bash
    cp .env.local.example .env.local
    ```
-   
+
    Edit `.env.local`:
    ```env
    NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_xyz123
-   NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=template_abc456
+   NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID=template_notification
+   NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID=template_confirmation
    NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=user_def789
    ```
+
+   For step-by-step instructions, see **[docs/EMAILJS_SETUP.md](./docs/EMAILJS_SETUP.md)**.
 
 ### Testing Without EmailJS
 
@@ -217,6 +220,8 @@ The form works in demo mode without credentials. Submissions will log to console
 | Services list | `sections/Services.tsx` |
 | Portfolio items | `sections/Portfolio.tsx` |
 | Testimonials | `sections/Testimonials.tsx` |
+| Privacy Policy content | `app/privacy-policy/page.tsx` |
+| Terms of Service content | `app/terms-of-service/page.tsx` |
 | Colors | `tailwind.config.ts` |
 
 ### Detailed Customization
@@ -432,8 +437,8 @@ This project is created for MC COLLO. All rights reserved.
 ## 🤝 Support
 
 For questions or issues:
-- **Email**: hello@mccollo.com
-- **Phone**: +1 (555) 123-4567
+- **Email**: mccollo48@gmail.com
+- **Phone**: +254 721 488 132
 
 ## 🙏 Credits
 
@@ -458,4 +463,4 @@ For questions or issues:
 
 **Built with ❤️ using Next.js, Tailwind CSS, and Framer Motion**
 
-**Last Updated**: March 28, 2026
+**Last Updated**: April 6, 2026

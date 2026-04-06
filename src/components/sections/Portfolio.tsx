@@ -16,7 +16,7 @@ const portfolioItems = [
     location: 'Moding, Teso North, Busia',
     date: '2024',
     guests: '250+',
-    image: '/Images/elegant receiption.jpeg',
+    image: '/Images/elegant-reception.jpeg',
     description: 'A beautiful traditional dowry ceremony celebrating culture, love, and family.',
   },
   {
@@ -56,7 +56,7 @@ const portfolioItems = [
     location: 'PCEA Church, Busia Parish',
     date: '2025',
     guests: '150+',
-    image: '/Images/Portfolio Image2.jpeg',
+    image: '/Images/portfolio-image-2.jpeg',
     description: 'A beautiful church wedding celebration filled with love, faith, and joy.',
   },
   {
@@ -85,7 +85,7 @@ const portfolioItems = [
     location: 'Yimbo Bondo',
     date: '2025',
     guests: '200+',
-    image: '/Images/Traditional dowry.jpeg',
+    image: '/Images/traditional-dowry.jpeg',
     description: 'Honoring rich cultural traditions and uniting two families with respect and joy.',
   },
   {
@@ -95,7 +95,7 @@ const portfolioItems = [
     location: 'Nakuru',
     date: '2025',
     guests: '500+',
-    image: '/Images/Kepsha Conference.jpeg',
+    image: '/Images/kepsha-conference.jpeg',
     description: 'Empowering educators through professional development, collaboration, and shared vision.',
   },
 ];

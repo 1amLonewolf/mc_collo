@@ -229,7 +229,10 @@ Never commit sensitive data:
 
 ```bash
 # .env.local (gitignored)
-NEXT_PUBLIC_EMAILJS_SERVICE_ID=xyz
+NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_xyz
+NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID=template_notification
+NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID=template_confirmation
+NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=user_def
 ```
 
 ```typescript
@@ -260,21 +263,35 @@ Ensure your hosting uses HTTPS:
 - Netlify: Automatic
 - Custom: Configure SSL certificate
 
-### Content Security Policy
+### Security Headers
 
-Add to `src/app/layout.tsx`:
+Security headers are configured in `next.config.mjs`:
+
+| Header | Value | Purpose |
+|---|---|---|
+| `X-Content-Type-Options` | `nosniff` | Prevents MIME type sniffing |
+| `X-Frame-Options` | `DENY` | Prevents clickjacking |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls referrer info |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | Forces HTTPS for 2 years |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Blocks sensitive browser APIs |
+| `Content-Security-Policy` | Whitelisted sources only | Prevents XSS and data exfiltration |
+
+### Form Security
+
+The contact form at `/api/contact` includes three layers of protection:
+
+1. **Honeypot Field** — A hidden `website` field that bots fill but humans don't see. If filled, the submission is silently discarded.
+2. **Time Validation** — Submissions made in under 3 seconds are rejected (bots submit instantly).
+3. **Rate Limiting** — Maximum 3 submissions per IP per hour. Configured in `src/lib/security.ts`.
+
+To adjust rate limits, edit `src/lib/security.ts`:
 
 ```typescript
-export const metadata: Metadata = {
-  // ...other metadata
-  headers: [
-    {
-      key: 'Content-Security-Policy',
-      value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;",
-    },
-  ],
-};
+const MAX_SUBMISSIONS = 3;        // Max attempts per window
+const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 ```
+
+For production-grade rate limiting (persists across serverless cold starts), consider using [Upstash Redis](https://upstash.com/) (free tier: 10k ops/day).
 
 ---
 

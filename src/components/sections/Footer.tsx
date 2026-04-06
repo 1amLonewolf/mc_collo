@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   Mail,
   Phone,
@@ -125,10 +126,10 @@ export function Footer() {
               <li className="flex items-start">
                 <Mail className="w-5 h-5 text-primary-400 mr-3 flex-shrink-0 mt-0.5" />
                 <a 
-                  href="mailto:hello@mccollo.com"
+                  href="mailto:mccollo48@gmail.com"
                   className="text-dark-400 hover:text-primary-400 transition-colors"
                 >
-                  hello@mccollo.com
+                  mccollo48@gmail.com
                 </a>
               </li>
               <li className="flex items-start">
@@ -168,12 +169,12 @@ export function Footer() {
               © {currentYear} MC Collo Events. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <a href="#" className="text-dark-500 hover:text-dark-300 text-xs sm:text-sm transition-colors">
+              <Link href="/privacy-policy" className="text-dark-500 hover:text-dark-300 text-xs sm:text-sm transition-colors">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-dark-500 hover:text-dark-300 text-xs sm:text-sm transition-colors">
+              </Link>
+              <Link href="/terms-of-service" className="text-dark-500 hover:text-dark-300 text-xs sm:text-sm transition-colors">
                 Terms of Service
-              </a>
+              </Link>
               <span className="text-dark-600 hidden sm:inline">•</span>
               <span className="text-dark-500 text-xs flex items-center gap-1.5 whitespace-nowrap">
                 <span>Built with</span>
@@ -181,11 +182,12 @@ export function Footer() {
                 <span>&</span>
                 <span>code</span>
                 <span className="text-[10px]">{`</>`}</span>
+                <span>by</span>
                 <a
                   href="https://marsden-maima-portfolio.vercel.app/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-400 hover:bg-primary-500 hover:text-white text-[10px] px-2 py-0.5 rounded-full transition-all duration-300 font-medium flex items-center gap-1 opacity-80 hover:opacity-100"
+                  className="text-primary-400 hover:bg-primary-500 hover:text-white text-[10px] px-2 py-0.5 rounded-full transition-all duration-300 font-medium flex items-center gap-1 opacity-80 hover:opacity-100 border border-primary-500/30 hover:border-primary-500"
                   title="Built by 1amlonewolf"
                 >
                   <span>1amlonewolf</span>

@@ -45,7 +45,8 @@ git push -u origin main
 6. Add Environment Variables:
    ```
    NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_xyz
-   NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=template_abc
+   NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID=template_notification
+   NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID=template_confirmation
    NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=user_def
    ```
 
@@ -203,7 +204,8 @@ docker build -t mc-collo .
 # Run container
 docker run -p 3000:3000 \
   -e NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_xyz \
-  -e NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=template_abc \
+  -e NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID=template_notification \
+  -e NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID=template_confirmation \
   -e NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=user_def \
   mc-collo
 ```
@@ -260,7 +262,8 @@ Ensure these are set in your hosting platform:
 
 ```env
 NEXT_PUBLIC_EMAILJS_SERVICE_ID=service_xyz
-NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=template_abc
+NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID=template_notification
+NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID=template_confirmation
 NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=user_def
 ```
 
@@ -386,7 +389,8 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
-          NEXT_PUBLIC_EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          NEXT_PUBLIC_EMAILJS_NOTIFICATION_TEMPLATE_ID: ${{ secrets.EMAILJS_NOTIFICATION_TEMPLATE_ID }}
+          NEXT_PUBLIC_EMAILJS_CONFIRMATION_TEMPLATE_ID: ${{ secrets.EMAILJS_CONFIRMATION_TEMPLATE_ID }}
           NEXT_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
       
       - name: Deploy to Vercel

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useTransition } from 'react';
+import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import {
   Mail,
@@ -16,9 +16,7 @@ import {
 import { Section, SectionHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea, Select } from '@/components/ui/Input';
-import { submitContactForm, FormSubmissionResult } from '@/app/actions';
-import emailjs from '@emailjs/browser';
-import { EMAILJS_CONFIG } from '@/lib/emailjs';
+import { FormSubmissionResult } from '@/app/actions';
 import { isValidEmail } from '@/lib/utils';
 
 const eventTypes = [
@@ -41,6 +39,41 @@ const guestCounts = [
   { value: '500+', label: '500+ guests' },
 ];
 
+const confirmationMessages: Record<string, { title: string; message: string }> = {
+  wedding: {
+    title: '🎉 Wedding Inquiry Received!',
+    message: 'Thank you for reaching out! I specialize in creating unforgettable wedding experiences. I\'ll review your details and get back to you within 24 hours to discuss your special day.',
+  },
+  corporate: {
+    title: '💼 Corporate Event Inquiry Received!',
+    message: 'Thanks for considering MC COLLO for your corporate event! I\'ll review your requirements and respond promptly to help make your event a success.',
+  },
+  gala: {
+    title: '✨ Gala/Award Ceremony Inquiry Received!',
+    message: 'Thank you for your inquiry! Galas and award ceremonies are my passion. I\'ll be in touch soon to discuss how we can create a memorable evening.',
+  },
+  conference: {
+    title: '🎤 Conference/Seminar Inquiry Received!',
+    message: 'Thanks for reaching out! I\'d be honored to be part of your conference. I\'ll review your details and get back to you with next steps.',
+  },
+  private: {
+    title: '🎊 Private Celebration Inquiry Received!',
+    message: 'Thank you for thinking of MC COLLO! Private celebrations are all about making memories. I\'ll contact you soon to discuss your vision.',
+  },
+  community: {
+    title: '🤝 Community Event Inquiry Received!',
+    message: 'Thanks for your inquiry! Community events are close to my heart. I\'ll review your details and respond as soon as possible.',
+  },
+  other: {
+    title: '✅ Inquiry Received!',
+    message: 'Thank you for reaching out! I\'ll review your message and get back to you soon. Looking forward to hearing more about your event!',
+  },
+};
+
+const getConfirmationMessage = (eventType: string) => {
+  return confirmationMessages[eventType] || confirmationMessages.other;
+};
+
 interface FormData {
   name: string;
   email: string;
@@ -50,6 +83,7 @@ interface FormData {
   guestCount: string;
   venue: string;
   message: string;
+  website: string; // Honeypot field — must match API route
 }
 
 interface FormErrors {
@@ -66,12 +100,14 @@ export function Contact() {
     guestCount: '',
     venue: '',
     message: '',
+    website: '', // Honeypot — must remain empty
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<FormSubmissionResult | null>(null);
-  const [useServerAction, setUseServerAction] = useState(true);
+  const [submittedEventType, setSubmittedEventType] = useState<string>('');
+  const [formLoadTime] = useState<number>(Date.now());
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -88,6 +124,8 @@ export function Contact() {
 
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
+    } else if (!/^(\+254|0)[17]\d{8}$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Please enter a valid Kenyan phone number (e.g., +254 700 000 000)';
     }
 
     if (!formData.eventType) {
@@ -108,47 +146,22 @@ export function Contact() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmitWithServerAction = async () => {
-    const formDataObj = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataObj.append(key, value);
-    });
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
-    const result = await submitContactForm(null, formDataObj);
+    if (!validateForm()) return;
 
-    if (result.success) {
-      setSubmitStatus(result);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        eventType: '',
-        eventDate: '',
-        guestCount: '',
-        venue: '',
-        message: '',
-      });
-      setErrors({});
-    } else {
-      if (result.errors) {
-        const clientErrors: FormErrors = {};
-        Object.entries(result.errors).forEach(([key, messages]) => {
-          clientErrors[key] = messages[0];
-        });
-        setErrors(clientErrors);
-      } else {
-        setSubmitStatus(result);
-      }
-    }
-  };
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    setSubmittedEventType('');
 
-  const handleSubmitWithEmailJS = async () => {
     try {
-      if (EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY') {
-        await emailjs.send(
-          EMAILJS_CONFIG.serviceId,
-          EMAILJS_CONFIG.templateId,
-          {
+      // Get user's IP for rate limiting (approximate, works on client)
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateParams: {
             from_name: formData.name,
             from_email: formData.email,
             phone: formData.phone,
@@ -157,51 +170,49 @@ export function Contact() {
             guest_count: formData.guestCount,
             venue: formData.venue,
             message: formData.message,
+            to_email: 'mccollo48@gmail.com',
+            confirmation_title: getConfirmationMessage(formData.eventType).title,
           },
-          EMAILJS_CONFIG.publicKey
-        );
-      } else {
-        console.log('Form submitted (demo mode):', formData);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      }
+          honeypot: formData.website,
+          formLoadTime: formLoadTime,
+        }),
+      });
 
-      setSubmitStatus({
-        success: true,
-        message: 'Message sent successfully! I\'ll get back to you soon.',
-      });
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        eventType: '',
-        eventDate: '',
-        guestCount: '',
-        venue: '',
-        message: '',
-      });
-      setErrors({});
+      const result = await response.json();
+
+      if (result.success) {
+        const confirmation = getConfirmationMessage(formData.eventType);
+        setSubmittedEventType(formData.eventType);
+        setSubmitStatus({
+          success: true,
+          message: confirmation.message,
+        });
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          eventType: '',
+          eventDate: '',
+          guestCount: '',
+          venue: '',
+          message: '',
+          website: '',
+        });
+        setErrors({});
+      } else {
+        setSubmitStatus({
+          success: false,
+          message: result.message || 'Failed to send message. Please try again.',
+        });
+      }
     } catch (error) {
       console.error('Form submission error:', error);
       setSubmitStatus({
         success: false,
-        message: 'Failed to send message. Please try again or email me directly.',
+        message: 'Failed to send message. Please try again or email me directly at mccollo48@gmail.com.',
       });
-    }
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setSubmitStatus(null);
-
-    if (useServerAction) {
-      startTransition(async () => {
-        await handleSubmitWithServerAction();
-      });
-    } else {
-      handleSubmitWithEmailJS();
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -218,11 +229,6 @@ export function Contact() {
         return newErrors;
       });
     }
-  };
-
-  const toggleSubmissionMethod = () => {
-    setUseServerAction(prev => !prev);
-    setSubmitStatus(null);
   };
 
   return (
@@ -257,8 +263,8 @@ export function Contact() {
               <ContactInfoItem
                 icon={Mail}
                 label="Email"
-                value="hello@mccollo.com"
-                href="mailto:hello@mccollo.com"
+                value="mccollo48@gmail.com"
+                href="mailto:mccollo48@gmail.com"
               />
               <ContactInfoItem
                 icon={Phone}
@@ -305,49 +311,196 @@ export function Contact() {
             viewport={{ once: true }}
           >
             <div className="bg-dark-800/50 backdrop-blur-sm rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 border border-dark-700">
-              {/* Success Message */}
+              {/* Success Popup Modal */}
               {submitStatus?.success && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                  onClick={() => setSubmitStatus(null)}
                 >
-                  <CheckCircle className="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="text-green-400 font-medium text-sm sm:text-base">Message sent successfully!</p>
-                    <p className="text-green-400/70 text-xs sm:text-sm">{submitStatus.message}</p>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    className="relative w-full max-w-md bg-dark-800 border border-green-500/30 rounded-3xl shadow-2xl p-6 sm:p-8"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setSubmitStatus(null)}
+                      className="absolute top-4 right-4 p-2 rounded-full bg-dark-700 hover:bg-dark-600 transition-colors"
+                      aria-label="Close"
+                    >
+                      <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+
+                    {/* Success Icon */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
+                      className="mx-auto w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4"
+                    >
+                      <CheckCircle className="w-10 h-10 text-green-400" />
+                    </motion.div>
+
+                    {/* Success Title */}
+                    <h3 className="text-center text-lg sm:text-xl font-display font-bold text-green-400 mb-3">
+                      {submittedEventType ? getConfirmationMessage(submittedEventType).title : 'Message Sent Successfully!'}
+                    </h3>
+
+                    {/* Success Message */}
+                    <p className="text-center text-dark-400 text-sm sm:text-base leading-relaxed mb-6">
+                      {submitStatus.message}
+                    </p>
+
+                    {/* Divider */}
+                    <div className="border-t border-dark-700 mb-6"></div>
+
+                    {/* Contact Info */}
+                    <div className="space-y-3 text-center">
+                      <p className="text-dark-400 text-xs sm:text-sm">
+                        Questions? Reach us at:
+                      </p>
+                      <a
+                        href="mailto:mccollo48@gmail.com"
+                        className="block text-primary-400 hover:text-primary-300 text-sm transition-colors"
+                      >
+                        📧 mccollo48@gmail.com
+                      </a>
+                      <a
+                        href="tel:+254721488132"
+                        className="block text-primary-400 hover:text-primary-300 text-sm transition-colors"
+                      >
+                        📱 +254 721 488 132
+                      </a>
+                    </div>
+
+                    {/* Close Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSubmitStatus(null)}
+                      className="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-xl transition-colors"
+                    >
+                      Got it!
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               )}
 
-              {/* Error Message */}
+              {/* Error Popup Modal */}
               {submitStatus && !submitStatus.success && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                  onClick={() => setSubmitStatus(null)}
                 >
-                  <AlertCircle className="w-5 h-5 text-red-400 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="text-red-400 font-medium text-sm sm:text-base">Something went wrong</p>
-                    <p className="text-red-400/70 text-xs sm:text-sm">{submitStatus.message}</p>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    className="relative w-full max-w-md bg-dark-800 border border-red-500/30 rounded-3xl shadow-2xl p-6 sm:p-8"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setSubmitStatus(null)}
+                      className="absolute top-4 right-4 p-2 rounded-full bg-dark-700 hover:bg-dark-600 transition-colors"
+                      aria-label="Close"
+                    >
+                      <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+
+                    {/* Error Icon */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
+                      className="mx-auto w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4"
+                    >
+                      <AlertCircle className="w-10 h-10 text-red-400" />
+                    </motion.div>
+
+                    {/* Error Title */}
+                    <h3 className="text-center text-lg sm:text-xl font-display font-bold text-red-400 mb-3">
+                      {submitStatus.message.includes('Failed to send') ? '❌ Submission Failed' : '⚠️ Error Occurred'}
+                    </h3>
+
+                    {/* Error Message */}
+                    <p className="text-center text-dark-400 text-sm sm:text-base leading-relaxed mb-6">
+                      {submitStatus.message}
+                    </p>
+
+                    {/* Error Type Details */}
+                    {submitStatus.message.includes('network') || submitStatus.message.includes('connection') ? (
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
+                        <p className="text-red-300 text-xs sm:text-sm font-medium mb-1">🔴 Error Type: Network/Connection Issue</p>
+                        <p className="text-dark-400 text-xs">Please check your internet connection and try again.</p>
+                      </div>
+                    ) : submitStatus.message.includes('invalid') || submitStatus.message.includes('required') ? (
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-6">
+                        <p className="text-red-300 text-xs sm:text-sm font-medium mb-1">🔴 Error Type: Invalid Form Data</p>
+                        <p className="text-dark-400 text-xs">Please review the fields below and ensure all required information is filled out correctly.</p>
+                      </div>
+                    ) : (
+                      <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+                        <p className="text-yellow-300 text-xs sm:text-sm font-medium mb-1">🟡 Error Type: Server/Processing Error</p>
+                        <p className="text-dark-400 text-xs">Something went wrong on our end. Please try again or contact us directly.</p>
+                      </div>
+                    )}
+
+                    {/* Direct Contact Info */}
+                    <div className="space-y-3 text-center mb-6">
+                      <p className="text-dark-400 text-xs sm:text-sm">
+                        Need immediate help? Contact us directly:
+                      </p>
+                      <a
+                        href="mailto:mccollo48@gmail.com"
+                        className="block text-primary-400 hover:text-primary-300 text-sm transition-colors"
+                      >
+                        📧 mccollo48@gmail.com
+                      </a>
+                      <a
+                        href="tel:+254721488132"
+                        className="block text-primary-400 hover:text-primary-300 text-sm transition-colors"
+                      >
+                        📱 +254 721 488 132
+                      </a>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="space-y-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSubmitStatus(null)}
+                        className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-xl transition-colors"
+                      >
+                        Try Again
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSubmitStatus(null)}
+                        className="w-full bg-dark-700 hover:bg-dark-600 text-dark-200 font-medium py-3 px-4 rounded-xl transition-colors"
+                      >
+                        Dismiss
+                      </motion.button>
+                    </div>
+                  </motion.div>
                 </motion.div>
               )}
-
-              {/* Submission Method Toggle */}
-              <div className="mb-4 sm:mb-6 flex items-center justify-between">
-                <p className="text-dark-400 text-xs sm:text-sm">
-                  Using: <span className="text-white font-medium">{useServerAction ? 'Server Action (Recommended)' : 'EmailJS (Fallback)'}</span>
-                </p>
-                <button
-                  type="button"
-                  onClick={toggleSubmissionMethod}
-                  className="text-xs text-primary-400 hover:text-primary-300 transition-colors underline"
-                >
-                  Switch method
-                </button>
-              </div>
 
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -359,7 +512,7 @@ export function Contact() {
                     value={formData.name}
                     onChange={handleChange}
                     error={errors.name}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   />
                   <Input
                     label="Email Address *"
@@ -369,20 +522,20 @@ export function Contact() {
                     value={formData.email}
                     onChange={handleChange}
                     error={errors.email}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <Input
-                    label="Phone Number *"
+                    label="Phone Number / WhatsApp *"
                     name="phone"
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+254 700 000 000"
                     value={formData.phone}
                     onChange={handleChange}
                     error={errors.phone}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   />
                   <Select
                     label="Event Type *"
@@ -391,7 +544,7 @@ export function Contact() {
                     value={formData.eventType}
                     onChange={handleChange}
                     error={errors.eventType}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -404,7 +557,7 @@ export function Contact() {
                     onChange={handleChange}
                     error={errors.eventDate}
                     min={new Date().toISOString().split('T')[0]}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   />
                   <Select
                     label="Guest Count"
@@ -412,7 +565,7 @@ export function Contact() {
                     options={guestCounts}
                     value={formData.guestCount}
                     onChange={handleChange}
-                    disabled={isPending}
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -423,7 +576,7 @@ export function Contact() {
                   placeholder="Event venue or city"
                   value={formData.venue}
                   onChange={handleChange}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 />
 
                 <Textarea
@@ -434,7 +587,24 @@ export function Contact() {
                   value={formData.message}
                   onChange={handleChange}
                   error={errors.message}
-                  disabled={isPending}
+                  disabled={isSubmitting}
+                />
+
+                {/* 🔒 SECURITY: Honeypot field — hidden from humans, bots will fill it */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  style={{ display: 'none' }}
+                  aria-hidden="true"
+                />
+
+                {/* 🔒 SECURITY: Form load time — used to detect instant bot submissions */}
+                <input
+                  type="hidden"
+                  name="_formLoadTime"
+                  value={formLoadTime}
                 />
 
                 <Button
@@ -442,9 +612,9 @@ export function Contact() {
                   variant="primary"
                   size="lg"
                   className="w-full"
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
-                  {isPending ? (
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Sending...
