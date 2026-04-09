@@ -20,9 +20,11 @@ export const metadata: Metadata = {
   description: 'MC Collo Events - Professional MC for weddings, corporate events, galas, conferences, and private celebrations. Creating unforgettable moments with charisma and professionalism.',
   keywords: ['MC', 'Master of Ceremonies', 'Wedding MC', 'Corporate Events', 'Event Host', 'Professional MC', 'MC Collo Events', 'Busia MC', 'Kenya MC', 'Dowry Ceremony', 'Fundraising MC'],
   authors: [{ name: 'MC Collo Events' }],
-  metadataBase: new URL('https://mccollo.com'),
+  creator: 'MC Collo Events',
+  publisher: 'MC Collo Events',
+  metadataBase: new URL('https://mccolloevents.com'),
   alternates: {
-    canonical: 'https://mccollo.com/',
+    canonical: 'https://mccolloevents.com/',
   },
   icons: {
     icon: [
@@ -35,14 +37,15 @@ export const metadata: Metadata = {
     title: 'MC Collo Events | Professional Master of Ceremonies',
     description: 'MC Collo Events - Professional MC for weddings, corporate events, galas, conferences, and private celebrations.',
     type: 'website',
-    url: 'https://mccollo.com/',
+    url: 'https://mccolloevents.com/',
     siteName: 'MC Collo Events',
+    locale: 'en_US',
     images: [
       {
-        url: '/Images/MC_COLLO_LOGO.png',
-        width: 512,
-        height: 512,
-        alt: 'MC Collo Events Logo',
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'MC Collo Events - Professional Master of Ceremonies',
       },
     ],
   },
@@ -50,7 +53,18 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'MC Collo Events | Professional Master of Ceremonies',
     description: 'Professional MC for weddings, corporate events, galas, conferences, and private celebrations.',
-    images: ['/Images/MC_COLLO_LOGO.png'],
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -59,6 +73,33 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'MC Collo Events',
+    description: 'Professional Master of Ceremonies for weddings, corporate events, galas, conferences, and private celebrations.',
+    url: 'https://mccolloevents.com',
+    image: 'https://mccolloevents.com/og-image.png',
+    logo: 'https://mccolloevents.com/Images/MC_COLLO_LOGO.png',
+    telephone: '+254721488132',
+    email: 'mccollo48@gmail.com',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Busia',
+      addressCountry: 'KE',
+    },
+    areaServed: {
+      '@type': 'Country',
+      name: 'Kenya',
+    },
+    serviceType: ['Event Hosting', 'Master of Ceremonies', 'Wedding MC', 'Corporate Event Hosting'],
+    priceRange: '$$',
+    sameAs: [
+      'https://facebook.com/mccolloevents',
+      'https://tiktok.com/@mccolloevents',
+    ],
+  };
+
   return (
     <html lang="en" className="scroll-smooth">
       <head>
@@ -66,6 +107,12 @@ export default function RootLayout({
         <meta name="theme-color" content="#020617" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <Script
+          type="application/ld+json"
+          id="json-ld"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Script
           id="register-sw"
           strategy="afterInteractive"

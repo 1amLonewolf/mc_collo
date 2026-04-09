@@ -5,9 +5,13 @@ import { ArrowLeft, Shield, Mail, Phone } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Privacy Policy | MC Collo Events',
   description: 'Privacy Policy for MC Collo Events. Learn how we collect, use, and protect your personal information.',
-  metadataBase: new URL('https://mccollo.com'),
+  metadataBase: new URL('https://mccolloevents.com'),
   alternates: {
-    canonical: 'https://mccollo.com/privacy-policy',
+    canonical: 'https://mccolloevents.com/privacy-policy',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

@@ -40,99 +40,128 @@
         canvas.height = 630;
         const ctx = canvas.getContext('2d');
 
-        // Background gradient
-        const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
-        gradient.addColorStop(0, '#0f172a');
-        gradient.addColorStop(0.5, '#1e293b');
-        gradient.addColorStop(1, '#0c4a6e');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 1200, 630);
+        // Load logo image
+        const logo = new Image();
+        logo.crossOrigin = 'anonymous';
+        // NOTE: You must open this file via a local server (e.g., `npx serve` in the project root)
+        // for the logo to load due to browser CORS restrictions on file:// protocol.
+        logo.src = '/Images/MC_COLLO_LOGO.png';
 
-        // Subtle grid pattern
-        ctx.strokeStyle = 'rgba(14, 165, 233, 0.03)';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < 1200; x += 40) {
+        logo.onload = function() {
+            drawCanvas(logo);
+        };
+
+        logo.onerror = function() {
+            // Fallback: draw without logo
+            drawCanvas(null);
+        };
+
+        function drawCanvas(logoImg) {
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(0.5, '#1e293b');
+            gradient.addColorStop(1, '#0c4a6e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1200, 630);
+
+            // Subtle grid pattern
+            ctx.strokeStyle = 'rgba(14, 165, 233, 0.03)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < 1200; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 630);
+                ctx.stroke();
+            }
+            for (let y = 0; y < 630; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(1200, y);
+                ctx.stroke();
+            }
+
+            // Glowing orbs
+            const orb1 = ctx.createRadialGradient(200, 150, 0, 200, 150, 300);
+            orb1.addColorStop(0, 'rgba(14, 165, 233, 0.15)');
+            orb1.addColorStop(1, 'rgba(14, 165, 233, 0)');
+            ctx.fillStyle = orb1;
+            ctx.fillRect(0, 0, 600, 400);
+
+            const orb2 = ctx.createRadialGradient(900, 450, 0, 900, 450, 250);
+            orb2.addColorStop(0, 'rgba(6, 182, 212, 0.12)');
+            orb2.addColorStop(1, 'rgba(6, 182, 212, 0)');
+            ctx.fillStyle = orb2;
+            ctx.fillRect(600, 200, 600, 500);
+
+            // Draw logo (centered, 140x140)
+            if (logoImg) {
+                const logoSize = 140;
+                const logoX = 600 - (logoSize / 2);
+                const logoY = 130;
+                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+            } else {
+                // Fallback: circle with "MC" text
+                ctx.beginPath();
+                ctx.arc(600, 200, 70, 0, Math.PI * 2);
+                const logoGrad = ctx.createLinearGradient(530, 130, 670, 270);
+                logoGrad.addColorStop(0, '#0ea5e9');
+                logoGrad.addColorStop(1, '#06b6d4');
+                ctx.fillStyle = logoGrad;
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 64px Georgia, serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('MC', 600, 200);
+            }
+
+            // Main title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 72px Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('MC COLLO EVENTS', 600, 370);
+
+            // Subtitle
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '32px "Segoe UI", sans-serif';
+            ctx.fillText('Professional Master of Ceremonies', 600, 430);
+
+            // Decorative line
+            ctx.strokeStyle = '#0ea5e9';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, 630);
+            ctx.moveTo(450, 460);
+            ctx.lineTo(750, 460);
             ctx.stroke();
+
+            // Bottom text
+            ctx.fillStyle = '#64748b';
+            ctx.font = '24px "Segoe UI", sans-serif';
+            ctx.fillText('Weddings • Corporate • Galas • Conferences', 600, 500);
+
+            // Website URL
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '20px "Segoe UI", sans-serif';
+            ctx.fillText('mccolloevents.com', 600, 550);
+
+            // Corner accents
+            ctx.strokeStyle = 'rgba(14, 165, 233, 0.3)';
+            ctx.lineWidth = 3;
+            // Top-left
+            ctx.beginPath(); ctx.moveTo(40, 80); ctx.lineTo(40, 40); ctx.lineTo(80, 40); ctx.stroke();
+            // Top-right
+            ctx.beginPath(); ctx.moveTo(1120, 80); ctx.lineTo(1160, 40); ctx.lineTo(1160, 80); ctx.stroke();
+            // Bottom-left
+            ctx.beginPath(); ctx.moveTo(40, 550); ctx.lineTo(40, 590); ctx.lineTo(80, 590); ctx.stroke();
+            // Bottom-right
+            ctx.beginPath(); ctx.moveTo(1120, 550); ctx.lineTo(1160, 590); ctx.lineTo(1160, 550); ctx.stroke();
+
+            // Append canvas to page
+            canvas.style.cssText = 'border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 100%;';
+            document.body.appendChild(canvas);
         }
-        for (let y = 0; y < 630; y += 40) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(1200, y);
-            ctx.stroke();
-        }
-
-        // Glowing orbs
-        const orb1 = ctx.createRadialGradient(200, 150, 0, 200, 150, 300);
-        orb1.addColorStop(0, 'rgba(14, 165, 233, 0.15)');
-        orb1.addColorStop(1, 'rgba(14, 165, 233, 0)');
-        ctx.fillStyle = orb1;
-        ctx.fillRect(0, 0, 600, 400);
-
-        const orb2 = ctx.createRadialGradient(900, 450, 0, 900, 450, 250);
-        orb2.addColorStop(0, 'rgba(6, 182, 212, 0.12)');
-        orb2.addColorStop(1, 'rgba(6, 182, 212, 0)');
-        ctx.fillStyle = orb2;
-        ctx.fillRect(600, 200, 600, 500);
-
-        // Center circle (logo placeholder)
-        ctx.beginPath();
-        ctx.arc(600, 200, 70, 0, Math.PI * 2);
-        const logoGrad = ctx.createLinearGradient(530, 130, 670, 270);
-        logoGrad.addColorStop(0, '#0ea5e9');
-        logoGrad.addColorStop(1, '#06b6d4');
-        ctx.fillStyle = logoGrad;
-        ctx.fill();
-
-        // "MC" text in circle
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 64px Georgia, serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('MC', 600, 200);
-
-        // Main title
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 72px Georgia, serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('MC COLLO EVENTS', 600, 370);
-
-        // Subtitle
-        ctx.fillStyle = '#38bdf8';
-        ctx.font = '32px "Segoe UI", sans-serif';
-        ctx.fillText('Professional Master of Ceremonies', 600, 430);
-
-        // Decorative line
-        ctx.strokeStyle = '#0ea5e9';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(450, 460);
-        ctx.lineTo(750, 460);
-        ctx.stroke();
-
-        // Bottom text
-        ctx.fillStyle = '#64748b';
-        ctx.font = '24px "Segoe UI", sans-serif';
-        ctx.fillText('Weddings • Corporate • Galas • Conferences', 600, 500);
-
-        // Website URL
-        ctx.fillStyle = '#38bdf8';
-        ctx.font = '20px "Segoe UI", sans-serif';
-        ctx.fillText('mccollo.com', 600, 550);
-
-        // Corner accents
-        ctx.strokeStyle = 'rgba(14, 165, 233, 0.3)';
-        ctx.lineWidth = 3;
-        // Top-left
-        ctx.beginPath(); ctx.moveTo(40, 80); ctx.lineTo(40, 40); ctx.lineTo(80, 40); ctx.stroke();
-        // Top-right
-        ctx.beginPath(); ctx.moveTo(1120, 80); ctx.lineTo(1160, 40); ctx.lineTo(1160, 80); ctx.stroke();
-        // Bottom-left
-        ctx.beginPath(); ctx.moveTo(40, 550); ctx.lineTo(40, 590); ctx.lineTo(80, 590); ctx.stroke();
-        // Bottom-right
-        ctx.beginPath(); ctx.moveTo(1120, 550); ctx.lineTo(1160, 590); ctx.lineTo(1160, 550); ctx.stroke();
 
         // Download handler
         document.getElementById('downloadBtn').addEventListener('click', function() {
@@ -141,10 +170,6 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
-
-        // Also append canvas so it's visible
-        canvas.style.cssText = 'border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 100%;';
-        document.body.appendChild(canvas);
     </script>
 </body>
 </html>

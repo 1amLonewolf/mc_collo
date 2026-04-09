@@ -5,9 +5,13 @@ import { ArrowLeft, Scale, Mail, Phone } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Terms of Service | MC Collo Events',
   description: 'Terms of Service for MC Collo Events. Understand the terms governing your use of our website and services.',
-  metadataBase: new URL('https://mccollo.com'),
+  metadataBase: new URL('https://mccolloevents.com'),
   alternates: {
-    canonical: 'https://mccollo.com/terms-of-service',
+    canonical: 'https://mccolloevents.com/terms-of-service',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -49,7 +53,7 @@ export default function TermsOfService() {
         <div className="space-y-10 sm:space-y-12">
           <Section title="1. Acceptance of Terms">
             <p>
-              By accessing or using the MC Collo Events website (<strong className="text-white">mccollo.com</strong>), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website.
+              By accessing or using the MC Collo Events website (<strong className="text-white">mccolloevents.com</strong>), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website.
             </p>
           </Section>
 

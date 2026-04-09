@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mccollo.com/sitemap.xml
+# Disallow access to API routes and admin paths
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+Sitemap: https://mccolloevents.com/sitemap.xml
